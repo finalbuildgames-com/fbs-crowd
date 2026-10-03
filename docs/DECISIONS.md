@@ -51,7 +51,7 @@ stubs under Emscripten).
 
 **Cost of the choice.** Worker lookups by handle go through `ecs_get_mut_id` (a hash/index
 lookup) on events such as queue admission and slot occupancy; bulk passes use cached
-query iteration over contiguous columns. The [2026-09-25 verification record](../../crowd-raylib/docs/VERIFICATION.md)
+query iteration over contiguous columns. The 2026-09-25 verification record (historical monorepo record)
 reports about 0.11 ms per tick for its 20,000-worker headless scenario. That historical
 smoke timing is not a current or target-hardware performance guarantee.
 

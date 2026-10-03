@@ -121,7 +121,7 @@ authoritative state in handle order (generations, liveness, component fields, sl
 link occupancy and queues, free slot ranges, ledgers). It never hashes struct bytes or
 padding and never depends on table order.
 
-The [dated verification record](../../crowd-raylib/docs/VERIFICATION.md) reports identical hashes for native Debug,
+The dated verification record (historical monorepo record) reports identical hashes for native Debug,
 native Release, clang ASan/UBSan and Emscripten single-threaded WASM on the 900- and
 20,000-worker scenarios with mass reassignment; identical hashes whether or not
 presentation is extracted and however ticks are batched; identical hashes between the
@@ -191,4 +191,4 @@ subtracts node coordinates as signed 32-bit values, and station production check
 output stock plus a cycle's output using unsigned 32-bit addition. Keep each linked
 coordinate delta within `int32_t` and `output_stock + output_per_cycle` within
 `uint32_t`. These unchecked cases are recorded in the
-[documentation audit ledger](../../../docs/DOCS-LEDGER.md#code-bugs-and-unresolved-evidence).
+documentation audit ledger (historical monorepo record).
