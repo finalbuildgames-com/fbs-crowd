@@ -1,0 +1,22 @@
+{
+  "module": "crowd",
+  "source_commit": "aa095f30bc7212f3f87eeaad98857cf96c4cdb7a",
+  "source_files": [
+    "modules/crowd/CMakeLists.txt",
+    "modules/crowd/cmake/FinalBuildCrowdConfig.cmake.in",
+    "modules/crowd/docs/API.md",
+    "modules/crowd/docs/DECISIONS.md",
+    "modules/crowd/docs/HOST-ECS.md",
+    "modules/crowd/examples/crowd_scenario.h",
+    "modules/crowd/include/fbs/crowd.h",
+    "modules/crowd/src/crowd.c",
+    "modules/crowd/tests/bench.c",
+    "modules/crowd/tests/test_core.c",
+    "modules/crowd/tests/test_flecs_alloc.c",
+    "third_party/flecs/flecs_no_addons.c",
+    "third_party/flecs/flecs_no_addons.h",
+    "third_party/flecs/LICENSE",
+    "third_party/flecs/PROVENANCE.json"
+  ],
+  "history": "fresh initial commit, later squashed snapshots"
+}

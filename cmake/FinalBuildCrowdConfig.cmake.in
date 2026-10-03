@@ -1,0 +1,7 @@
+@PACKAGE_INIT@
+include(CMakeFindDependencyMacro)
+if(NOT "@EMSCRIPTEN@" AND NOT WIN32)
+  find_dependency(Threads)
+endif()
+include("${CMAKE_CURRENT_LIST_DIR}/FinalBuildCrowdTargets.cmake")
+check_required_components(FinalBuildCrowd)
