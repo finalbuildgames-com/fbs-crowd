@@ -14,7 +14,7 @@ Header: `include/fbs/crowd.h` (C99, `extern "C"`). Package `FinalBuildCrowd`, ta
 | Route graph | Host-supplied nodes (rooms/ports, with a room id) and undirected links with a traveller capacity | Context arrays plus a precomputed next-hop table |
 
 Positions are integer millimetres, +Y up. Quantities are integer units. Time is whole ticks.
-The simulation never reads a clock; the host decides the tick rate (the demo uses 30 Hz).
+The simulation never reads a clock; the host decides the tick rate.
 
 ## Lifetime and errors
 
@@ -121,11 +121,18 @@ authoritative state in handle order (generations, liveness, component fields, sl
 link occupancy and queues, free slot ranges, ledgers). It never hashes struct bytes or
 padding and never depends on table order.
 
-The dated verification record (historical monorepo record) reports identical hashes for native Debug,
-native Release, clang ASan/UBSan and Emscripten single-threaded WASM on the 900- and
-20,000-worker scenarios with mass reassignment; identical hashes whether or not
-presentation is extracted and however ticks are batched; identical hashes between the
-rendered demo and a headless replay of the same commands.
+What the shipped tests check (`tests/test_core.c`), within one build: the 900-worker
+scenario with mass reassignment gives the same hash whether ticks are stepped 1, 7 or 600
+at a time and whether or not presentation is extracted, and extraction leaves the hash
+unchanged. The test prints the scenario hashes as `HASH name value` lines, and
+`fbs_crowd_bench` prints a final hash per population.
+
+Cross-build comparison (native against WebAssembly, Debug against Release, sanitizer
+builds) is done by comparing those printed `HASH` lines between runs. It is not automated
+in this repository, and no shipped test compares hashes across builds. An earlier run of
+that manual comparison found identical hashes for native Debug, native Release, an
+ASan/UBSan build and Emscripten single-threaded WebAssembly; treat that as a historical
+observation, not a result for the current build.
 
 Tick advancement and arbitration use integer state. Graph setup uses a floating-point
 square-root estimate when deriving link lengths, corrected with integer arithmetic.
@@ -190,5 +197,4 @@ Current arithmetic limits also require care with extreme inputs: presentation
 subtracts node coordinates as signed 32-bit values, and station production checks
 output stock plus a cycle's output using unsigned 32-bit addition. Keep each linked
 coordinate delta within `int32_t` and `output_stock + output_per_cycle` within
-`uint32_t`. These unchecked cases are recorded in the
-documentation audit ledger (historical monorepo record).
+`uint32_t`. The library does not check these cases.

@@ -6,8 +6,9 @@
 [Flecs](https://github.com/SanderMertens/flecs) world owned by each `fbs_crowd` context.
 Flecs **v4.1.6** (commit `fb55f3c25660425cfe1bc4cf5e6bff8b3f18a9b8`) is vendored unmodified
 in `third_party/flecs/` as the upstream core-only amalgamation (`distr/flecs_no_addons.*`),
-MIT, with SHA-256 provenance. The owner selected Flecs after an ECS comparison
-(Studio report `ecs-selection-2026-09-25.md`); EnTT and Gaia-ECS remain fallbacks.
+MIT, with SHA-256 provenance. The owner selected Flecs after comparing C and C++ ECS
+libraries: it has a C99 core API, archetype storage, cached queries and documented
+Emscripten support. EnTT and Gaia-ECS remain fallbacks.
 
 The existing core modules considered here (`logistics`, `scheduler`, `navigation`)
 use C APIs and their own bounded, handle-based state. A
@@ -25,8 +26,8 @@ share entity/component infrastructure and Flecs' inspection tooling.
   workers.
 - High-cardinality, frequently changing state (intent, route cursor, slot assignment,
   cargo) is plain component data. There are no per-worker tags, no relationship pairs and no
-  per-destination tables, so reassignment never moves an entity between tables. In the recorded 2026-09-25 verification run,
-  the table count stayed at 56 (Flecs built-ins plus our three archetypes) through build,
+  per-destination tables, so reassignment never moves an entity between tables. In a 2026-09-25 run of
+  `tests/test_flecs_alloc.c`, the table count stayed at 56 (Flecs built-ins plus our three archetypes) through build,
   stepping, mass reassignment, remove/add and reset at 20,000 workers.
 - Specialised side structures with explicit ownership: handle tables (public identity →
   entity), the chain slot pool (items belong to slots; each chain owns a range), the route
@@ -46,13 +47,13 @@ stubs under Emscripten).
 | Dependency | One vendored C file (≈1.6 MB source), statically linked into `libfbs_crowd`. The MIT notice is installed as `share/licenses/FinalBuildCrowd/FLECS-LICENSE`. `FBS_CROWD_FLECS_SOURCE` points at another copy; the build refuses any version other than 4.1.6. |
 | Global state | Flecs' OS API table (`ecs_os_api`) is process-global. The module does not override it; a host that customises it affects every world. |
 | Allocation | Our buffers are allocated at create. Flecs allocates while building (617 calls for the 20k scenario) and grows tables on demand. The 2026-09-25 run recorded with a counting Flecs OS API: 0 Flecs allocations during steady stepping, extraction, hashing, mass reassignment, 10 % remove/add cycles and reset/rebuild at the same peak population. Structural-phase counts are observations, not test assertions; growth beyond a previous peak can allocate. Flecs allocation failure aborts. |
-| WASM | Builds with Emscripten 3.1.61 single-threaded. Flecs' query descriptors need more than Emscripten's 64 KiB default stack: link with `-sSTACK_SIZE=1048576` (the module's WASM tests and the demo do). |
-| Determinism | Flecs iteration order is never used to decide outcomes (see API.md, "Tick order"). Hashes match across native/WASM, build types and sanitizers. |
+| WASM | Builds with Emscripten 3.1.61 single-threaded. Flecs' query descriptors need more than Emscripten's 64 KiB default stack: link with `-sSTACK_SIZE=1048576` (the module's WASM test targets do). |
+| Determinism | Flecs iteration order is never used to decide outcomes (see API.md, "Tick order"). The shipped tests check, within one build, that the state hash is the same whether ticks are stepped 1, 7 or 600 at a time and with or without presentation extraction. Comparing hashes across builds (native and WASM, build types, sanitizers) is done by comparing the printed `HASH` lines and is not automated in this repository; see API.md, "Determinism and hashing". |
 
 **Cost of the choice.** Worker lookups by handle go through `ecs_get_mut_id` (a hash/index
 lookup) on events such as queue admission and slot occupancy; bulk passes use cached
-query iteration over contiguous columns. The 2026-09-25 verification record (historical monorepo record)
-reports about 0.11 ms per tick for its 20,000-worker headless scenario. That historical
+query iteration over contiguous columns. A 2026-09-25 run of `fbs_crowd_bench` (`tests/bench.c`,
+native Release) measured about 0.11 ms per tick for the 20,000-worker headless scenario. That historical
 smoke timing is not a current or target-hardware performance guarantee.
 
 ## Relationship to existing FBS systems

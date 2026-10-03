@@ -97,7 +97,7 @@ if(FBS_CROWD_BUILD_TESTS AND BUILD_TESTING)
     foreach(_t fbs_crowd_test_core fbs_crowd_test_flecs_alloc fbs_crowd_bench)
       target_link_options(${_t} PRIVATE -sALLOW_MEMORY_GROWTH=1 -sENVIRONMENT=node -sEXIT_RUNTIME=1
         -sSTACK_SIZE=1048576)
-      # CommonJS output: the repository package.json declares ES modules.
+      # CommonJS output (.cjs), so Node runs it even inside a package that declares ES modules.
       set_target_properties(${_t} PROPERTIES SUFFIX ".cjs")
       add_test(NAME crowd_wasm_${_t} COMMAND node ${CMAKE_CURRENT_BINARY_DIR}/${_t}.cjs)
     endforeach()

@@ -1,6 +1,8 @@
 /* fbs::crowd behaviour tests: conservation, backpressure, handles, reset,
- * reassignment, queues, removal/export and determinism. Prints scenario
- * hashes ("HASH name value") for native/WASM parity comparison. */
+ * reassignment, queues, removal/export and determinism. Determinism is checked
+ * within this build only. Scenario hashes are printed ("HASH name value") so
+ * different builds (for example native and WASM) can be compared by hand;
+ * that cross-build comparison is not automated here. */
 #include "fbs/crowd.h"
 
 #define CROWD_SCENARIO_IMPLEMENTATION

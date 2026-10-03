@@ -1,7 +1,7 @@
 # Using fbs::crowd from a host with its own ECS
 
 The crowd context is the **only authoritative owner** of worker, chain and station
-simulation state. A host ECS (Flecs, EnTT, a hand-written registry, MooCow's C# model) may
+simulation state. A host ECS (Flecs, EnTT, a hand-written registry, a host's C# model) may
 refer to crowd entities, but must not keep a second authoritative copy of their state.
 
 ## Rules
@@ -9,7 +9,7 @@ refer to crowd entities, but must not keep a second authoritative copy of their 
 1. **Store the handle, not the state.** Give host entities a component such as
    `CrowdWorkerRef { fbs_crowd_handle handle; }`. Read state through
    `fbs_crowd_worker_get` / `fbs_crowd_extract`; change it only through crowd commands.
-2. **One direction of ownership.** Create crowd workers from host logic (or MooCow import),
+2. **One direction of ownership.** Create crowd workers from host logic (or a host data import),
    store the returned handle, and remove the crowd worker when the host entity is
    destroyed. If the crowd reports `STALE`, the host entity's reference is dead: drop it.
 3. **Host tags for identity.** Put the host's stable id in `desc.tag`. Save files store the
@@ -53,8 +53,8 @@ fbs_crowd_extract(crowd, frac, inst, cap, &n, &total);
    returns info.tag for mapping back to the host. */
 ```
 
-## MooCow and other modules
+## Host data and other modules
 
-Nothing else in FinalBuildSystems or MooCow needs to convert to Flecs. A MooCow world
-package can describe rooms, passages, stations and chains; the game translates that data
+Neither other FinalBuildSystems modules nor the host need to convert to Flecs. A host's
+world data can describe rooms, passages, stations and chains; the host translates that data
 into `fbs_crowd_set_graph`, `add_station` and `add_chain` calls.
