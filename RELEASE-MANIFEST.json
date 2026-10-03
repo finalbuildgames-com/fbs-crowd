@@ -1,6 +1,6 @@
 {
   "module": "crowd",
-  "source_commit": "9c246abdc04d0c1f8f90545f7c2694a02291adad",
+  "source_commit": "cd0f7ae445d7ccad81b9d6b601d088b66ae6d061",
   "source_files": [
     "modules/crowd/CMakeLists.txt",
     "modules/crowd/cmake/FinalBuildCrowdConfig.cmake.in",
@@ -16,7 +16,8 @@
     "third_party/flecs/flecs_no_addons.c",
     "third_party/flecs/flecs_no_addons.h",
     "third_party/flecs/LICENSE",
-    "third_party/flecs/PROVENANCE.json"
+    "third_party/flecs/PROVENANCE.json",
+    "tools/release/readmes/crowd.md"
   ],
   "history": "fresh initial commit, later squashed snapshots"
 }
