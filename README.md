@@ -84,21 +84,30 @@ Build it with `target_link_libraries(your_target PRIVATE fbs::crowd)` after addi
 
 ## Build and test
 
-Requires CMake 3.16 or newer and a C99 compiler. The pinned Flecs 4.1.6 core amalgamation is vendored in `third_party/flecs/` and compiled into the library; CMake refuses any other Flecs version. The target links `libm` (non-MSVC), `Threads::Threads` (native non-Windows, for Flecs' default OS layer) and `dbghelp` (Windows).
+Requires CMake 3.16 or newer, a C99 compiler and your generator's build tool
+(for example Make or Ninja). Run the commands from this repository's root. The pinned Flecs 4.1.6 core amalgamation is vendored in `third_party/flecs/` and compiled into the library; CMake refuses any other Flecs version. The target links `libm` (non-MSVC), `Threads::Threads` (native non-Windows, for Flecs' default OS layer) and `dbghelp` (Windows).
 
 ```sh
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
-cmake --build build --parallel 2
-ctest --test-dir build --output-on-failure --no-tests=error
+cmake --build build --parallel 1
+(cd build && ctest --output-on-failure)
 ```
 
-CTest runs three entries:
+The default native CTest configuration runs three entries:
 
 - `crowd_core` (`tests/test_core.c`): config validation, routing and tie breaks, chain throughput, backpressure, vacant slots, handle staleness and reuse, batch reassignment with conflicting entries, removal exports, haulers queueing on a capacity-1 link, capacity errors, reset, presentation, and conservation checked every tick in the flow tests. Its determinism test runs a seeded 900-worker scenario for 600 ticks and asserts the same state hash whether ticks are stepped 1, 7 or 600 at a time and whether or not instances are extracted. It prints `HASH` lines but does not compare them against other builds.
 - `crowd_flecs_alloc` (`tests/test_flecs_alloc.c`): builds a 20,000-worker scenario with a counting Flecs allocator and asserts zero Flecs allocations during 300 ticks of stepping and extraction and during two mass reassignments with 1,200 ticks, and a constant Flecs table count through remove/add and reset cycles. Allocation counts for structural phases are printed, not asserted.
 - `example`: runs `fbs_example` (`examples/basic.c`), which creates and destroys a context.
 
 `fbs_crowd_bench` (`tests/bench.c`) is also built. It prints CPU time per tick and a hash for chosen populations; it is a smoke tool, not a performance claim. No shipped test compares state hashes between native and WebAssembly builds. `CMakeLists.txt` has an Emscripten path that runs the same tests under Node; the included CI builds natively on Linux only.
+
+The Emscripten configuration also registers `fbs_crowd_bench` as a Node-run
+CTest entry; running that suite includes a timing workload. It does not compare
+its hashes with a native build.
+
+`BUILD_SHARED_LIBS` selects static (default) or shared libraries. Use static
+libraries on Windows: the public header has no DLL export annotations and the
+target does not enable automatic symbol exports.
 
 Options: `FBS_CROWD_BUILD_TESTS` (default ON, also needs `BUILD_TESTING`), `FBS_CROWD_ENABLE_SANITIZERS` (GCC/Clang ASan and UBSan), `FBS_CROWD_FLECS_SOURCE` (another copy of the pinned amalgamation).
 
@@ -126,7 +135,11 @@ This repository ships the C library only. Engine adapters and language bindings 
 - **Versioning.** `FBS_CROWD_VERSION` is `1` and is mixed into the state hash. The CMake project is version 0.1.0 with SOVERSION 0. There is no runtime version function and the config structs have no size field.
 - **Errors.** Most calls return `fbs_crowd_result` (`OK`, `INVALID`, `CAPACITY`, `STALE`, `MEMORY`, `STATE`, `UNREACHABLE`, `BACKEND`). Single commands validate before changing anything. Batch commands are not atomic: every valid entry is applied, `results[i]` gets each outcome, and the call returns the first failure.
 
-More detail: `docs/API.md` (semantics and limits), `docs/DECISIONS.md` (why Flecs), `docs/HOST-ECS.md` (mapping host entities to handles).
+More detail: [API](docs/API.md) (semantics and limits),
+[decisions](docs/DECISIONS.md) (why Flecs), and [host ECS integration](docs/HOST-ECS.md)
+(mapping host entities to handles). The public entry point is
+[include/fbs/crowd.h](include/fbs/crowd.h); [examples/basic.c](examples/basic.c)
+is the minimal lifecycle program.
 
 ## License
 
